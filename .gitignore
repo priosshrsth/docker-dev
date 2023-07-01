@@ -5,4 +5,5 @@ volumes/phpmyadmin/*
 !volumes/phpmyadmin/themes/
 
 certs/*
+!certs/.keep
 nginx/vhost.d/*.*
