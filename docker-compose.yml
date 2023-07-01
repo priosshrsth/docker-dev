@@ -1,21 +1,21 @@
 version: "3.8"
 
 services:
-  mysql:
-    container_name: mysql
-    restart: always
-    image: mysql:5.6
-    logging:
-      driver: "none"
-    expose:
-      - "3305"
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-    networks:
-      pagevamp:
-        ipv4_address: 172.18.0.13
-    volumes:
-      - ./volumes/mysql:/var/lib/mysql
+  # mysql:
+  #   container_name: mysql
+  #   restart: always
+  #   image: mysql:5.6
+  #   logging:
+  #     driver: "none"
+  #   expose:
+  #     - "3305"
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #   networks:
+  #     pagevamp:
+  #       ipv4_address: 172.18.0.13
+  #   volumes:
+  #     - ./volumes/mysql:/var/lib/mysql
 
   mysql7:
     container_name: mysql7
