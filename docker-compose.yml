@@ -130,7 +130,7 @@ services:
       - PMA_HOSTS=mysql7,mysql8,mysql
     restart: always
     volumes:
-      - ./volumes/phpmyadmin/themes/custom:/var/www/html/themes/pmahomme
+      - ./volumes/phpmyadmin/themes/darkwolf:/var/www/html/themes/pmahomme
     expose:
       - "80"
     networks:
