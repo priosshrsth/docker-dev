@@ -10,3 +10,16 @@ Run docker-compose up **service**. eg. `$ docker-compose up mysql`
 
 ### Access PHPMyAdmin
 Activate the phpmyadmin service and access it from [phpmyadmin.local](http://phpmyadmin.local). Enter host `mysql` and username, password as configured.
+
+
+## Edit hosts file
+
+172.18.0.13 mysql
+172.18.0.14 mysql7
+172.18.0.15 mysql8
+172.18.0.16 postgres
+172.18.0.17 mongo
+172.18.0.18 redis
+
+127.0.0.2 phpmyadmin.local
+127.0.0.2 redis.local
