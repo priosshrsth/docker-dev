@@ -1,21 +1,21 @@
 version: "3.8"
 
 services:
-  # mysql:
-  #   container_name: mysql
-  #   restart: always
-  #   image: mysql:5.6
-  #   logging:
-  #     driver: "none"
-  #   expose:
-  #     - "3305"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: root
-  #   networks:
-  #     pagevamp:
-  #       ipv4_address: 172.18.0.13
-  #   volumes:
-  #     - ./volumes/mysql:/var/lib/mysql
+  mysql:
+    container_name: mysql
+    restart: always
+    image: mysql:5.6
+    logging:
+      driver: "none"
+    expose:
+      - "3305"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      pagevamp:
+        ipv4_address: 172.18.0.13
+    volumes:
+      - ./volumes/mysql:/var/lib/mysql
 
   mysql7:
     container_name: mysql7
@@ -34,37 +34,53 @@ services:
     volumes:
       - ./volumes/mysql7:/var/lib/mysql
 
-  # mysql8:
-  #   container_name: mysql8
-  #   restart: always
-  #   image: mysql:8
-  #   expose:
-  #     - "3306"
-  #   logging:
-  #     driver: "none"
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: root
-  #   networks:
-  #     pagevamp:
-  #       ipv4_address: 172.18.0.15
-  #   volumes:
-  #     - ./volumes/mysql8:/var/lib/mysql  
+  mysql8:
+    container_name: mysql8
+    restart: always
+    image: mysql:8
+    expose:
+      - "3306"
+    logging:
+      driver: "none"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      pagevamp:
+        ipv4_address: 172.18.0.15
+    volumes:
+      - ./volumes/mysql8:/var/lib/mysql
 
-  # postgres:
-  #   container_name: postgres
-  #   image: postgres:14-alpine
+  postgres:
+    container_name: postgres
+    image: postgres:14-alpine
+    restart: always
+    logging:
+      driver: "none"
+    environment:
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - ./volumes/postgres/data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      pagevamp:
+        ipv4_address: 172.18.0.16
+
+  # postgres12:
+  #   container_name: postgres-12
+  #   image: postgres:12-alpine
   #   restart: always
   #   logging:
   #     driver: "none"
   #   environment:
   #     POSTGRES_PASSWORD: admin
   #   volumes:
-  #     - ./volumes/postgres/data:/var/lib/postgresql/data
+  #     - ./volumes/postgres/12:/var/lib/postgresql/data
   #   ports:
-  #     - 5432:5432
+  #     - 5433:5432
   #   networks:
   #     pagevamp:
-  #       ipv4_address: 172.18.0.16
+  #       ipv4_address: 172.18.0.19
 
   # mongo:
   #   container_name: mongo
@@ -86,57 +102,54 @@ services:
   #     pagevamp:
   #       ipv4_address: 172.18.0.17
 
-  # redis:
-  #   container_name: redis
-  #   restart: always
-  #   image: redis:5
-  #   logging:
-  #     driver: "none"
-  #   volumes:
-  #     - ./volumes/redis:/data
-  #   expose:
-  #     - "6379"
-  #   networks:
-  #     pagevamp:
-  #       ipv4_address: 172.18.0.18
-
-  
-  nginx-proxy:
-    image: jwilder/nginx-proxy:alpine
-    container_name: nginx-proxy
+  redis:
+    container_name: redis
     restart: always
-    ports:
-      - "81:80"
-      - "444:443"
+    image: redis:5
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./certs:/etc/nginx/certs
-      - ./nginx/custom.conf:/etc/nginx/conf.d/custom.conf
-      - ./nginx/vhost.d:/etc/nginx/vhost.d
-    # logging:
-    #   driver: "none"
-    networks:
-      - pagevamp
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin:latest
-    container_name: phpmyadmin
-    environment:
-      - PMA_ARBITRARY=1
-      - VIRTUAL_HOST=phpmyadmin.local
-      - PMA_PORT=3306
-      - UPLOAD_LIMIT=300000
-      - PMA_HOSTS=mysql7,mysql8,mysql
-    restart: always
-    volumes:
-      - ./volumes/phpmyadmin/themes/darkwolf:/var/www/html/themes/pmahomme
+      - ./volumes/redis:/data
     expose:
-      - "80"
+      - "6379"
     networks:
-      - pagevamp
-    logging:
-      driver: "none"
+      pagevamp:
+        ipv4_address: 172.18.0.18
+
+  # nginx-proxy:
+  #   image: jwilder/nginx-proxy:alpine
+  #   container_name: nginx-proxy
+  #   restart: always
+  #   ports:
+  #     - "81:80"
+  #     - "444:443"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #     - ./certs:/etc/nginx/certs
+  #     - ./nginx/custom.conf:/etc/nginx/conf.d/custom.conf
+  #     - ./nginx/vhost.d:/etc/nginx/vhost.d
+  #   # logging:
+  #   #   driver: "none"
+  #   networks:
+  #     - pagevamp
+
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin:latest
+  #   container_name: phpmyadmin
+  #   environment:
+  #     - PMA_ARBITRARY=1
+  #     - VIRTUAL_HOST=phpmyadmin.local
+  #     - PMA_PORT=3306
+  #     - UPLOAD_LIMIT=300000
+  #     - PMA_HOSTS=mysql7,mysql8,mysql
+  #   restart: always
+  #   volumes:
+  #     - ./volumes/phpmyadmin/themes/darkwolf:/var/www/html/themes/pmahomme
+  #   expose:
+  #     - "80"
+  #   networks:
+  #     - pagevamp
+  #   logging:
+  # driver: "none"
 
   # redis.local:
   #   container_name: redis.local

@@ -79,6 +79,9 @@ body {
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
+table.w-auto {
+    width: 100% !important;
+}
 hr {
     margin: 1rem 0;
     color: inherit;
