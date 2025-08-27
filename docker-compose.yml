@@ -1,10 +1,9 @@
 name: docker-dev
 
 services:
-  mysql5:
-    platform: linux/amd64
-    image: mysql:5.6
-    container_name: mysql5
+  mysql:
+    image: mysql:8.4
+    container_name: mysql
     restart: unless-stopped
     env_file:
       - .env
@@ -14,9 +13,9 @@ services:
       - MYSQL_USER=${MYSQL_USER:-app}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD:-app}
     ports:
-      - "${MYSQL5_PORT:-3305}:3306"
+      - "${MYSQL_PORT:-3306}:3306"
     volumes:
-      - ./volumes/mysql5:/var/lib/mysql
+      - ./volumes/mysql:/var/lib/mysql
     healthcheck:
       test:
         [
@@ -27,35 +26,7 @@ services:
       timeout: 5s
       retries: 20
     labels:
-      - dev.orbstack.domains=mysql5.orb.local
-    logging:
-      driver: "none"
-  # mysql:
-  #   image: mysql:8.4
-  #   container_name: mysql
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
-  #     - MYSQL_DATABASE=${MYSQL_DATABASE:-app}
-  #     - MYSQL_USER=${MYSQL_USER:-app}
-  #     - MYSQL_PASSWORD=${MYSQL_PASSWORD:-app}
-  #   ports:
-  #     - "${MYSQL_PORT:-3306}:3306"
-  #   volumes:
-  #     - ./volumes/mysql:/var/lib/mysql
-  #   healthcheck:
-  #     test:
-  #       [
-  #         "CMD-SHELL",
-  #         "mysqladmin ping -h localhost -p${MYSQL_ROOT_PASSWORD:-root} || exit 1",
-  #       ]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 20
-  #   labels:
-  #     - dev.orbstack.domains=mysql.orb.local
+      - dev.orbstack.domains=mysql.orb.local
 
   postgres:
     image: postgres:17-alpine
@@ -83,80 +54,80 @@ services:
     logging:
       driver: "none"
 
-  # redis:
-  #   image: redis:7.4-alpine
-  #   container_name: redis
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - REDIS_APPENDONLY=${REDIS_APPENDONLY:-yes}
-  #   command: ["redis-server", "--appendonly", "${REDIS_APPENDONLY:-yes}"]
-  #   ports:
-  #     - "${REDIS_PORT:-6379}:6379"
-  #   volumes:
-  #     - ./volumes/redis:/data
-  #   healthcheck:
-  #     test: ["CMD", "redis-cli", "ping"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 20
-  #   labels:
-  #     - dev.orbstack.domains=redis.orb.local
+  redis:
+    image: redis:7.4-alpine
+    container_name: redis
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - REDIS_APPENDONLY=${REDIS_APPENDONLY:-yes}
+    command: ["redis-server", "--appendonly", "${REDIS_APPENDONLY:-yes}"]
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - ./volumes/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    labels:
+      - dev.orbstack.domains=redis.orb.local
 
   # # Convex self-hosted (backend + dashboard)
-  # convex-backend:
-  #   image: ghcr.io/get-convex/convex-backend:33cef775a8a6228cbacee4a09ac2c4073d62ed13
-  #   container_name: convex-backend
-  #   restart: unless-stopped
-  #   stop_grace_period: 10s
-  #   stop_signal: SIGINT
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - INSTANCE_NAME=${CONVEX_INSTANCE_NAME:-dev-instance}
-  #     - INSTANCE_SECRET=${CONVEX_INSTANCE_SECRET:-}
-  #     - CONVEX_CLOUD_ORIGIN=${CONVEX_CLOUD_ORIGIN:-http://localhost:${CONVEX_BACKEND_PORT:-3210}}
-  #     - CONVEX_SITE_ORIGIN=${CONVEX_SITE_ORIGIN:-http://localhost:${CONVEX_PROXY_PORT:-3211}}
-  #     - POSTGRES_URL=${POSTGRES_URL:-postgresql://postgres:admin@postgres:5432}
-  #     - RUST_LOG=${RUST_LOG:-info}
-  #     - DO_NOT_REQUIRE_SSL=${DO_NOT_REQUIRE_SSL:-true}
-  #   ports:
-  #     - "${CONVEX_BACKEND_PORT:-3210}:3210"
-  #     - "${CONVEX_PROXY_PORT:-3211}:3211"
-  #   volumes:
-  #     - ./volumes/convex:/convex/data
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "curl -sf http://localhost:3210/version > /dev/null"]
-  #     interval: 5s
-  #     timeout: 5s
-  #     start_period: 10s
-  #     retries: 30
-  #   labels:
-  #     - dev.orbstack.domains=convex.api.orb.local,convex.site.orb.local
-  #   logging:
-  #     driver: "none"
+  convex-backend:
+    image: ghcr.io/get-convex/convex-backend:33cef775a8a6228cbacee4a09ac2c4073d62ed13
+    container_name: convex-backend
+    restart: unless-stopped
+    stop_grace_period: 10s
+    stop_signal: SIGINT
+    env_file:
+      - .env
+    environment:
+      - INSTANCE_NAME=${CONVEX_INSTANCE_NAME:-dev-instance}
+      - INSTANCE_SECRET=${CONVEX_INSTANCE_SECRET:-}
+      - CONVEX_CLOUD_ORIGIN=${CONVEX_CLOUD_ORIGIN:-http://localhost:${CONVEX_BACKEND_PORT:-3210}}
+      - CONVEX_SITE_ORIGIN=${CONVEX_SITE_ORIGIN:-http://localhost:${CONVEX_PROXY_PORT:-3211}}
+      - POSTGRES_URL=${POSTGRES_URL:-postgresql://postgres:admin@postgres:5432}
+      - RUST_LOG=${RUST_LOG:-info}
+      - DO_NOT_REQUIRE_SSL=${DO_NOT_REQUIRE_SSL:-true}
+    ports:
+      - "${CONVEX_BACKEND_PORT:-3210}:3210"
+      - "${CONVEX_PROXY_PORT:-3211}:3211"
+    volumes:
+      - ./volumes/convex:/convex/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3210/version > /dev/null"]
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 30
+    labels:
+      - dev.orbstack.domains=convex.api.orb.local,convex.site.orb.local
+    logging:
+      driver: "none"
 
-  # # convex-dashboard:
-  #   image: ghcr.io/get-convex/convex-dashboard:latest
-  #   container_name: convex-dashboard
-  #   restart: unless-stopped
-  #   stop_grace_period: 10s
-  #   stop_signal: SIGINT
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     - NEXT_PUBLIC_DEPLOYMENT_URL=${NEXT_PUBLIC_DEPLOYMENT_URL:-https://convex-backend.docker-dev.orb.local}
-  #   ports:
-  #     - "${CONVEX_DASHBOARD_PORT:-6791}:6791"
-  #   depends_on:
-  #     convex-backend:
-  #       condition: service_healthy
-  #   labels:
-  #     - dev.orbstack.domains=convex.dashboard.orb.local
+  convex-dashboard:
+    image: ghcr.io/get-convex/convex-dashboard:latest
+    container_name: convex-dashboard
+    restart: unless-stopped
+    stop_grace_period: 10s
+    stop_signal: SIGINT
+    env_file:
+      - .env
+    environment:
+      - NEXT_PUBLIC_DEPLOYMENT_URL=${NEXT_PUBLIC_DEPLOYMENT_URL:-https://convex-backend.docker-dev.orb.local}
+    ports:
+      - "${CONVEX_DASHBOARD_PORT:-6791}:6791"
+    depends_on:
+      convex-backend:
+        condition: service_healthy
+    labels:
+      - dev.orbstack.domains=convex.dashboard.orb.local
 
   # Local Google Cloud Storage emulator
   gcs:
@@ -206,23 +177,5 @@ services:
       - "${SMTP_PORT:-1025}:1025" # smtp port
     logging:
       driver: "none"
-
-  # # phpmyadmin:
-  #   image: phpmyadmin:5-apache
-  #   container_name: phpmyadmin
-  #   restart: unless-stopped
-  #   env_file:
-  #     - .env
-  #   environment:
-  #     PMA_HOST: mysql5
-  #     PMA_USER: root
-  #     PMA_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
-  #     UPLOAD_LIMIT: 1G
-  #   ports:
-  #     - "${PHPMYADMIN_PORT:-8081}:80"
-  #   depends_on:
-  #     - mysql5
-  #   labels:
-  #     - dev.orbstack.domains=phpmyadmin.orb.local
-  # logging:
-  #   driver: "none"
+    labels:
+      - dev.orbstack.domains=mail.orb.local
