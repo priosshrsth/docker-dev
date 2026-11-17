@@ -1,9 +1,4 @@
-volumes/*
-!volumes/phpmyadmin/
-
-volumes/phpmyadmin/*
-!volumes/phpmyadmin/themes/
-
-certs/*
-!certs/.keep
-nginx/vhost.d/*.*
+.env
+.DS_Store
+volumes/
+multibase/

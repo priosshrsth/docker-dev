@@ -1,25 +1,54 @@
-## Docker Compose for Activating Services that Needs Data Persistence
+# docker-dev
 
-The application containers are dependent on the various services. This docker-compose is used for those services and it will be available for all containers on the same network. The services runs on default network.
+Shared backing services (Postgres, MySQL, Redis, GCS emulator, Mailpit) for local development. The same `docker-compose.yml` runs on macOS (OrbStack) and Linux (native Docker + Caddy).
 
-#### How to activate all services containers?
-If we need to activate all the service containers, run `$ docker-compose up`
+| Service       | Profile     | Linux                            | macOS (OrbStack)          |
+| ------------- | ----------- | -------------------------------- | ------------------------- |
+| Postgres 18 + pgvector | *(always)* | `postgres.localhost:5432` | `postgres.orb.local`      |
+| MySQL 8.4     | `mysql`     | `mysql.localhost:3306`           | `mysql.orb.local`         |
+| MySQL 5.6     | `mysql5`    | `mysql5.localhost:3305`          | `mysql5.orb.local`        |
+| Redis 8       | `redis`     | `redis.localhost:6379`           | `redis.orb.local`         |
+| Dragonfly     | `dragonfly` | `dragonfly.localhost:6380`       | `dragonfly.orb.local`     |
+| GCS emulator  | `gcs`       | https://gcs.localhost            | `gcs.orb.local`           |
+| Mailpit       | `mail`      | https://mail.localhost (SMTP `:1025`) | `mail.orb.local`     |
 
-#### How to activate selective service containers?
-Run docker-compose up **service**. eg. `$ docker-compose up mysql`
+`*.localhost` always resolves to the local machine (on Linux, macOS and in browsers), so the published ports also work on the Mac.
 
-### Access PHPMyAdmin
-Activate the phpmyadmin service and access it from [phpmyadmin.local](http://phpmyadmin.local). Enter host `mysql` and username, password as configured.
+## Setup
 
+### Linux (Arch / CachyOS)
 
-## Edit hosts file
+```sh
+./scripts/setup-linux.sh          # install Docker, enable service, add docker group (re-login after)
+cp .env.example .env              # keep `proxy` in COMPOSE_PROFILES
+docker compose up -d
+./scripts/trust-caddy-ca.sh       # once: trust Caddy's local CA for https://*.localhost
+```
 
-172.18.0.13 mysql
-172.18.0.14 mysql7
-172.18.0.15 mysql8
-172.18.0.16 postgres
-172.18.0.17 mongo
-172.18.0.18 redis
+The `caddy` service ([caddy-docker-proxy](https://github.com/lucaslorentz/caddy-docker-proxy)) binds ports 80/443 and reads `caddy=` labels. To expose a new HTTP service, add:
 
-127.0.0.2 phpmyadmin.local
-127.0.0.2 redis.local
+```yaml
+labels:
+  - caddy=myapp.localhost
+  - caddy.reverse_proxy={{upstreams 3000}}
+```
+
+### macOS (OrbStack)
+
+```sh
+cp .env.example .env              # remove `proxy` from COMPOSE_PROFILES
+docker compose up -d
+```
+
+OrbStack reads the `dev.orbstack.domains` labels.
+
+## Usage
+
+```sh
+docker compose up -d                          # postgres + profiles in COMPOSE_PROFILES
+docker compose --profile mysql up -d          # add a service ad hoc
+docker compose ps
+docker compose logs -f postgres
+```
+
+Data lives in `./volumes/` (gitignored). Postgres runs any `*.sql`/`*.sh` in `volumes/postgres/init/` the first time the database is created.
